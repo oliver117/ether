@@ -536,11 +536,7 @@ package body Ether.Requests is
       SCGI_Value : String := Value(Object, SCGI);
    begin
       --  According to the spec, this should always be "1"
-      if SCGI_Value = "" or SCGI_Value /= "1" then
-         return False;
-      end if;
-
-      return True;
+      return (SCGI_Value = "1");
    end Is_Valid;
 
 
