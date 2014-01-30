@@ -64,7 +64,6 @@ package Ether.Requests is
    procedure Clean(Object : in out Request);
 
    --  Check to see if this is a real SCGI request.
-   --  Raises SCGI_Error.
    function Is_Valid(Object : Request) return Boolean;
 
    function Value(Object : Request; Item : Header) return String;
