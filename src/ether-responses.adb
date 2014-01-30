@@ -5,7 +5,6 @@
 --  Created On      : Sun Jul  4 19:22:48 2010
 
 with Ada.Characters.Latin_1;
---with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Strings.Unbounded;
 
 package body Ether.Responses is
@@ -13,6 +12,7 @@ package body Ether.Responses is
    package US renames Ada.Strings.Unbounded;
    
    use type US.Unbounded_String;
+   use type AWS.Messages.Status_Code;
 
    CRLF : constant String := (L1.CR, L1.LF);
 
@@ -23,29 +23,26 @@ package body Ether.Responses is
       Content   : in String;
       Char_Set  : in String := "UTF-8") is
       
-      Actual_Char_Set : US.Unbounded_String := US.To_Unbounded_String("; charset=");
+      Actual_Char_Set : US.Unbounded_String := US.To_Unbounded_String("; charset=" & Char_Set);
    begin
       if Char_Set = "" then
 	 Actual_Char_Set := US.Null_Unbounded_String;
-      else
-	 Actual_Char_Set := Actual_Char_Set & Char_Set;
       end if;
-      
-      -- TODO: Check to make sure that there is no body for response codes:
-      --       1xx, 204, 304, raise an exception if it does. See S.4.3 of
-      --       RFC2616.
 
---      Object := Request'(Status => Status, Mime => Mime, Content => Content);
+      if (Status in AWS.Messages.Informational or
+            Status = AWS.Messages.S204 or
+              Status = AWS.Messages.S304) and then
+      -- response must not include a message-body, or else raise Response_Error
+        Content /= "" then
+         raise Response_Error with
+           "[Ether] Response with status """ & AWS.Messages.Image (Status) & """ must not include a message-body.";
+      end if;
+
       String'Write
         (Output,
          "Status: " & AWS.Messages.Image(Status) & CRLF &
          "Content-Type: " & Mime_Type & US.To_String(Actual_Char_Set) & CRLF &
          CRLF &
          Content);
-
---        Put_Line("Status: " & Status_Map(Status) & " " & Status_Type'Image(Status) & CRLF &
---           "Content-Type: " & US.To_String(Mime_Map(Mime)) & CRLF &
---           CRLF &
---           Content);
    end Send;
 end Ether.Responses;

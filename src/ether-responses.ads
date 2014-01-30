@@ -7,12 +7,15 @@
 --  with Ada.Strings.Unbounded;
 with GNAT.Sockets;
 with AWS.Messages;
+with Unicode.CES.Utf8;
 
 package Ether.Responses is
    procedure Send
      (Output    : in GNAT.Sockets.Stream_Access;
       Status    : in AWS.Messages.Status_Code;
       Mime_Type : in String;
-      Content   : in String; --  TODO: This should be a Unicode string.
+      Content   : in Unicode.CES.Utf8.Utf8_String;
       Char_Set  : in String := "UTF-8");
+
+   Response_Error : exception;
 end Ether.Responses;
